@@ -1,0 +1,1124 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Речное умножение</title>
+<style>
+:root {
+  --ink: #17324d;
+  --cream: #fff8df;
+  --yellow: #ffd75a;
+  --orange: #ff8a45;
+  --green: #42b883;
+  --red: #e95252;
+  --water: #59c3e6;
+  --water2: #329fc8;
+  --bank: #93d36e;
+  --bank2: #69b752;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { font-family: Trebuchet MS, Arial, sans-serif; background: #c8ef9d; color: var(--ink); overflow: hidden; user-select: none; }
+.app { height: 100%; min-height: 540px; position: relative; overflow: hidden; }
+
+.screen { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; background: radial-gradient(circle at 50% 30%, #fff9c5 0 16%, transparent 40%), linear-gradient(#8ee1ef 0 34%, #b5df7a 34%); overflow-y: auto; }
+.screen.active { display: flex; }
+
+.card { width: min(620px, 94vw); background: rgba(255, 255, 255, 0.94); border: 5px solid #fff; border-radius: 28px; padding: clamp(20px, 5vw, 40px); text-align: center; box-shadow: 0 18px 50px #235b6d44; position: relative; margin: auto; }
+.logo-illus { width: 100%; max-width: 240px; height: 130px; margin: 0 auto 10px; display: block; }
+h1 { font-size: clamp(32px, 6vw, 48px); line-height: 0.95; margin: 5px 0 10px; color: #17638a; font-weight: 900; }
+h1 span { color: #f07c36; }
+.sloogan { font-size: clamp(16px, 3.2vw, 21px); font-weight: 800; color: #3b7491; margin: 10px auto 20px; max-width: 480px; line-height: 1.3; }
+
+/* Стартовый экран: большая иллюстрация без белой карточки */
+#splashScreen { padding: 0; background: #79d8ed; }
+#splashScreen .splash-card { width: 100%; height: 100%; max-width: none; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; overflow: hidden; }
+.splash-art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.splash-overlay { position: absolute; z-index: 2; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(13,70,95,.12)); }
+#splashScreen h1 { font-size: clamp(48px, 9vw, 92px); line-height: .92; margin: 0 0 18px; color: #fff; text-shadow: 0 5px 0 #17638a, 0 10px 26px rgba(10,69,92,.45); }
+#splashScreen h1 span { color: #ffe363; text-shadow: 0 5px 0 #c66b25, 0 10px 26px rgba(92,46,10,.35); }
+#splashScreen .sloogan { max-width: 720px; margin: 0 0 30px; padding: 10px 18px; color: #fff; font-size: clamp(19px, 3.5vw, 30px); text-shadow: 0 2px 5px #13516e; }
+#splashScreen .primary { min-width: min(360px, 84vw); padding: 19px 48px; font-size: clamp(27px, 5vw, 38px); border: 4px solid #fff5b5; box-shadow: 0 9px 0 #bd6818, 0 14px 28px rgba(39,73,40,.38); }
+
+.rules-title { font-size: clamp(22px, 4vw, 28px); font-weight: 1000; color: #17638a; margin-bottom: 12px; }
+.rules-list { margin: 0 auto 20px; max-width: 500px; text-align: left; background: #eef8ff; border-radius: 18px; padding: 16px 20px 16px 45px; font-size: clamp(15px, 2.8vw, 19px); line-height: 1.45; }
+.rules-list li { padding: 4px 0; font-weight: 600; }
+
+.mode-title { font-size: clamp(22px, 4vw, 28px); font-weight: 1000; color: #17638a; margin-bottom: 15px; }
+.mode-picker-large { display: flex; flex-direction: column; gap: 12px; margin: 15px 0 25px; }
+.mode-btn-large { border: 4px solid #c4e1ea; border-radius: 22px; background: #f4fbff; color: #234e64; padding: 16px 20px; text-align: left; display: flex; align-items: center; gap: 18px; cursor: pointer; transition: .2s; width: 100%; }
+.mode-btn-large .ico { font-size: clamp(32px, 6vw, 44px); }
+.mode-btn-large .details { display: flex; flex-direction: column; }
+.mode-btn-large .m-title { font-size: clamp(20px, 4vw, 25px); font-weight: 900; }
+.mode-btn-large .m-desc { font-size: clamp(12px, 2.5vw, 14px); opacity: 0.8; margin-top: 2px; font-weight: 600; }
+.mode-btn-large.selected { border-color: #ffb62e; background: #fff1a9; box-shadow: 0 4px 12px #dc8e2044; transform: scale(1.02); }
+
+.primary { border: 0; border-radius: 20px; background: linear-gradient(#ffdd59, #ffb62e); box-shadow: 0 7px 0 #d68218; color: #633600; font: 900 clamp(20px, 4vw, 26px) inherit; padding: 14px 45px; cursor: pointer; transition: .15s; min-width: 200px; }
+.primary:hover { transform: translateY(-2px); }
+.primary:active { transform: translateY(5px); box-shadow: 0 2px 0 #d68218; }
+.secondary { border: 3px solid #8bc2d3; border-radius: 20px; background: #fff; color: #24617c; font: 900 18px inherit; padding: 12px 30px; cursor: pointer; transition: .15s; }
+.secondary:hover { background: #f0f9fc; }
+
+.game { background: var(--bank); display: none; }
+.game.active { display: block; }
+.hud { position: absolute; z-index: 30; left: 0; right: 0; top: 0; padding: max(10px, env(safe-area-inset-top)) 15px 8px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; background: linear-gradient(#17324de8, #17324dbb, transparent); color: #fff; }
+.progress { font-weight: 900; font-size: 15px; }
+.progressbar { height: 8px; background: #ffffff42; border-radius: 10px; margin-top: 5px; overflow: hidden; }
+.progressbar i { display: block; height: 100%; background: var(--yellow); width: 0%; transition: .35s; }
+.title { font-size: clamp(16px, 3vw, 22px); font-weight: 900; text-align: center; letter-spacing: 0.5px; }
+.hud-right { display: flex; align-items: center; justify-content: flex-end; gap: 15px; }
+.hearts { font-size: clamp(18px, 4vw, 26px); letter-spacing: 2px; }
+.heart.off { filter: grayscale(1); opacity: .3; }
+.exit-btn { background: #e95252; color: #fff; border: 0; padding: 6px 12px; font-weight: 900; border-radius: 10px; cursor: pointer; font-size: 13px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: 0.15s; }
+.exit-btn:hover { background: #ff6b6b; transform: scale(1.05); }
+
+.river-world { position: absolute; inset: 0; background: radial-gradient(circle at 8% 15%, #f5d96b 0 3px, transparent 4px), radial-gradient(circle at 89% 27%, #fff 0 3px, transparent 4px), linear-gradient(90deg, var(--bank2), var(--bank) 15%, var(--bank) 85%, var(--bank2)); overflow: hidden; }
+.river { position: absolute; top: -8%; bottom: -8%; left: 50%; width: min(50vw, 430px); min-width: 230px; transform: translateX(-50%); background: linear-gradient(90deg, #3fa8ce, var(--water) 18%, #72d4ed 50%, var(--water) 82%, #3fa8ce); box-shadow: inset 18px 0 0 #ffffff17, inset -18px 0 0 #197da32b; }
+.river:after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(174deg, transparent 0 35px, #ffffff25 38px 41px, transparent 44px 75px); animation: flow .75s linear infinite; }
+@keyframes flow { to { background-position: 0 75px; } }
+.river-world.cruising .river:after { animation-duration: .22s; }
+
+.bank-detail { position: absolute; inset: -150px 0 0; pointer-events: none; background: radial-gradient(ellipse at 8% 20%, #397f3d 0 5px, transparent 6px), radial-gradient(ellipse at 91% 65%, #397f3d 0 6px, transparent 7px), radial-gradient(ellipse at 13% 74%, #e9cb52 0 5px, transparent 6px), radial-gradient(ellipse at 86% 32%, #e9cb52 0 5px, transparent 6px); background-size: 120px 150px; animation: bankFlow 2.2s linear infinite; }
+@keyframes bankFlow { to { background-position: 0 150px; } }
+.river-world.cruising .bank-detail { animation-duration: .55s; }
+
+.river-world.no-timer .timer { display: none; }
+
+/* Режим Юнга: светлее и позитивнее + бабочки + солнце */
+.river-world.junior-theme {
+  --bank: #aae972;
+  --bank2: #84d643;
+  --water: #6fe4ff;
+  background: linear-gradient(90deg, #8ad747, #aae972 15%, #aae972 85%, #8ad747);
+}
+.junior-sun {
+  position: absolute;
+  top: 75px;
+  left: 25px;
+  width: clamp(50px, 10vw, 80px);
+  height: clamp(50px, 10vw, 80px);
+  background: #ffde37;
+  border-radius: 50%;
+  box-shadow: 0 0 25px #ffea6c, inset -4px -4px 0 #e2be00;
+  z-index: 9;
+  display: none;
+  animation: sunPulse 3s ease-in-out infinite alternate;
+}
+.junior-sun::before {
+  content: "☀️";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(30px, 6vw, 50px);
+}
+.river-world.junior-theme .junior-sun { display: block; }
+@keyframes sunPulse { 0% { transform: scale(0.95) rotate(0deg); } 100% { transform: scale(1.05) rotate(15deg); } }
+
+.butterflies-box { position: absolute; inset: 0; pointer-events: none; z-index: 10; display: none; }
+.river-world.junior-theme .butterflies-box { display: block; }
+.bfly { position: absolute; font-size: 28px; animation: flyAround 14s linear infinite; opacity: 0.9; }
+.bfly:nth-child(2) { animation-duration: 18s; animation-delay: -4s; font-size: 24px; }
+.bfly:nth-child(3) { animation-duration: 22s; animation-delay: -8s; font-size: 32px; }
+@keyframes flyAround {
+  0% { transform: translate(-40px, 70vh) scaleX(1); }
+  30% { transform: translate(30vw, 35vh) scaleX(1); }
+  50% { transform: translate(55vw, 55vh) scaleX(-1); }
+  75% { transform: translate(80vw, 20vh) scaleX(-1); }
+  100% { transform: translate(105vw, 60vh) scaleX(1); }
+}
+
+/* Режим Шторм */
+.river-world.storm {
+  --water: #365f78;
+  --water2: #233f59;
+  --bank: #4f6951;
+  --bank2: #314c3c;
+  background: linear-gradient(90deg, #233a32, #4f6951 15%, #4f6951 85%, #233a32);
+  filter: saturate(.72);
+}
+.river-world.storm:before { content: ""; position: absolute; z-index: 29; inset: 0; pointer-events: none; background: repeating-linear-gradient(105deg, transparent 0 17px, #d8f5ff99 18px 20px, transparent 21px 34px); background-size: 100% 120px; animation: stormRain .32s linear infinite; opacity: .75; }
+.river-world.storm .river { background: linear-gradient(90deg, #1d4057, #416f88 18%, #557e91 50%, #416f88 82%, #1d4057); box-shadow: inset 22px 0 0 #0d283655, inset -22px 0 0 #0d283655; }
+.river-world.storm .river:after { opacity: .7; animation-duration: .35s; }
+.river-world.storm .bank-detail { filter: brightness(.65); animation-duration: 1s; }
+.river-world.storm .shore { filter: brightness(.55); animation: wind .7s ease-in-out infinite alternate; }
+.river-world.storm .boat:not(.left):not(.right):not(.sink) { animation: stormRock .8s ease-in-out infinite alternate; }
+.river-world.storm.flash { animation: lightning .55s ease-out; }
+@keyframes stormRain { to { background-position: -40px 120px; } }
+@keyframes stormRock { to { transform: translateX(-50%) rotate(5deg) translateY(3px); } }
+@keyframes wind { to { transform: skewX(-9deg) translateX(5px); } }
+@keyframes lightning { 0%, 100% { filter: saturate(.72) brightness(1); } 12%, 27% { filter: saturate(.55) brightness(2.1); } 18% { filter: saturate(.72) brightness(.8); } }
+
+.fork { position: absolute; z-index: 5; left: 50%; top: 28%; width: min(94vw, 760px); height: 44%; transform: translateX(-50%); opacity: 0; transition: .25s; }
+.fork.show { opacity: 1; }
+.fork.travel { animation: routePass 4.3s cubic-bezier(.25, .65, .35, 1) forwards; }
+@keyframes routePass {
+  0% { transform: translateX(-50%) translateY(-12vh) scale(.82); opacity: 1; }
+  38% { transform: translateX(-50%) translateY(10vh) scale(.96); opacity: 1; }
+  82% { opacity: 1; }
+  100% { transform: translateX(-50%) translateY(72vh) scale(1.18); opacity: 0; }
+}
+.fork svg { width: 100%; height: 100%; overflow: visible; }
+/* Развилка показана как карта речных каналов вокруг явно оформленного острова.
+   Асимметрия, угловатые берега и детали ландшафта убирают нежелательные ассоциации. */
+.fork-base { display: none; }
+/* Фон развилки прозрачен: видны естественные берега игрового мира, без прямоугольной плашки. */
+.fork-island { fill: #78bd5c; stroke: #4f9840; stroke-width: 6; stroke-linejoin: round; }
+.river-world.junior-theme .fork-island { fill: #94d977; stroke: #62ad4d; }
+.river-world.storm .fork-island { fill: #3f5541; stroke: #293c2d; }
+.island-rock { fill: #78868a; stroke: #536268; stroke-width: 4; }
+.island-tree-trunk { stroke: #70452c; stroke-width: 9; stroke-linecap: round; }
+.island-tree { fill: #2f8446; stroke: #236b37; stroke-width: 4; }
+.river-world.storm .island-tree { fill: #294c35; stroke: #1c3525; }
+.channel-sign { fill: #ffd75a; stroke: #684329; stroke-width: 5; }
+.channel-arrow { fill: none; stroke: #17324d; stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+
+.water-path { fill: none; stroke: currentColor; stroke-width: 118; stroke-linecap: butt; stroke-linejoin: round; color: #59c3e6; }
+.river-world.junior-theme .water-path { color: #6fe4ff; }
+.river-world.storm .water-path { color: #416f88; }
+
+.water-edge { fill: none; stroke: currentColor; stroke-width: 128; stroke-linecap: butt; stroke-linejoin: round; color: #349fc7; }
+.river-world.junior-theme .water-edge { color: #2bbfe7; }
+.river-world.storm .water-edge { color: #224255; }
+
+.water-shine { fill: none; stroke: #ffffff38; stroke-width: 66; stroke-linecap: round; stroke-dasharray: 9 25; animation: dash .72s linear infinite; pointer-events: none; }
+.water-current { fill: none; stroke: #e9fbff; stroke-width: 5; stroke-linecap: round; stroke-dasharray: 2 17 28 24; opacity: .72; animation: currentFlow .62s linear infinite; pointer-events: none; }
+.water-current.alt { stroke-width: 3; stroke-dasharray: 18 31 4 22; opacity: .42; animation-duration: .9s; animation-direction: reverse; }
+.river-world.storm .water-current { stroke: #c9ecf6; opacity: .5; }
+.river-world.cruising .water-shine { animation-duration: .3s; }
+.river-world.cruising .water-current { animation-duration: .27s; }
+.river-world.cruising .water-current.alt { animation-duration: .4s; }
+@keyframes dash { to { stroke-dashoffset: 34; } }
+@keyframes currentFlow { to { stroke-dashoffset: 71; } }
+
+.question-box { position: absolute; z-index: 25; top: 12%; left: 50%; transform: translateX(-50%) scale(.9); width: min(92vw, 560px); padding: 12px 16px 14px; border-radius: 22px; background: #fffdf3; border: 4px solid #fff; box-shadow: 0 10px 25px #164b6760; text-align: center; opacity: 0; transition: .25s; }
+.question-box.show { opacity: 1; transform: translateX(-50%) scale(1); }
+.prompt { font-size: 14px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 900; color: #4f7891; }
+.example { font-size: clamp(64px, 12vw, 95px); font-weight: 1000; line-height: 1; margin: 4px 0; color: #17324d; letter-spacing: -2px; }
+.timer { height: 10px; background: #dbe8ec; border-radius: 12px; overflow: hidden; margin-top: 5px; }
+.timer i { height: 100%; width: 100%; display: block; background: var(--green); transform-origin: left; }
+.timer i.running { animation: countdown var(--time-total,5s) linear forwards; }
+@keyframes countdown {
+  0% { transform: scaleX(1); background: var(--green); }
+  65% { background: var(--yellow); }
+  100% { transform: scaleX(0); background: var(--red); }
+}
+
+.answers { position: absolute; z-index: 26; left: 50%; top: 64%; transform: translateX(-50%); width: min(92vw, 700px); display: grid; grid-template-columns: 1fr 1fr; gap: clamp(14px, 4vw, 36px); opacity: 0; pointer-events: none; transition: .2s; }
+.answers.show { opacity: 1; pointer-events: auto; }
+.answer { height: clamp(110px, 18vh, 155px); border: 5px solid #fff; border-radius: 26px; background: #fff8df; color: var(--ink); font-family: inherit; font-size: clamp(80px, 16vw, 130px); font-weight: 1000; line-height: .9; box-shadow: 0 8px 0 #c89738, 0 12px 24px #17445d55; cursor: pointer; position: relative; text-shadow: 0 3px 0 #fff; letter-spacing: -4px; display: flex; align-items: center; justify-content: center; }
+.answer:first-child:before { content: "←"; position: absolute; left: 18px; color: #359bc0; font-size: 32px; font-weight: 900; }
+.answer:last-child:after { content: "→"; position: absolute; right: 18px; color: #359bc0; font-size: 32px; font-weight: 900; }
+.answer:active { transform: translateY(6px); box-shadow: 0 2px 0 #c89738; }
+.answer.correct { background: #bdf2c9; border-color: #fff; box-shadow: 0 8px 0 #42a568; color: #156934; }
+.answer.wrong { background: #ffc1b5; box-shadow: 0 8px 0 #c84e42; color: #7c2218; }
+
+.boat { position: absolute; z-index: 18; left: 50%; bottom: 6%; width: 72px; height: 126px; transform: translateX(-50%); transition: transform .8s cubic-bezier(.2,.8,.2,1), bottom .8s cubic-bezier(.2,.8,.2,1), opacity .6s; }
+.hull { position: absolute; inset: 0; background: linear-gradient(90deg, #7c361e, #d06a31 20%, #e78a47 50%, #d06a31 80%, #7c361e); clip-path: polygon(50% 0, 88% 18%, 100% 73%, 78% 100%, 22% 100%, 0 73%, 12% 18%); box-shadow: inset 0 0 0 5px #6f351f; }
+.inside { position: absolute; left: 13px; right: 13px; top: 25px; bottom: 17px; border-radius: 40% 40% 35% 35%; background: #ffcf6a; border: 4px solid #783b24; }
+.seat { position: absolute; left: 7px; right: 7px; height: 8px; background: #783b24; border-radius: 4px; }
+.seat.a { top: 22px; }
+.seat.b { bottom: 23px; }
+
+/* Увеличенные и яркие повреждения лодки */
+.damage-mark { position: absolute; z-index: 30; display: none; color: #ff002b; font: 1000 52px/1 Arial, sans-serif; text-shadow: 0 0 4px #fff, 0 0 10px #ffea00, 2px 2px 0 #7b0012; filter: drop-shadow(0 0 6px #ffcf00); -webkit-user-select: none; }
+.damage-mark.d1 { display: block; left: -8px; top: 35px; transform: rotate(-25deg); }
+.damage-mark.d2 { display: block; right: -8px; top: 60px; transform: rotate(20deg); }
+.damage-mark.d3 { display: block; left: 16px; top: 2px; font-size: 58px; color: #ff0000; }
+
+.wake { position: absolute; z-index: -1; left: 8px; right: 8px; bottom: -27px; height: 45px; border: 4px solid #fff8; border-top: 0; border-radius: 0 0 50% 50%; animation: wake 1s infinite; }
+@keyframes wake { 50% { transform: scale(1.25); opacity: .3; } }
+
+.boat.left { animation: sailLeft 4.3s cubic-bezier(.35,.05,.25,1) forwards; }
+.boat.right { animation: sailRight 4.3s cubic-bezier(.35,.05,.25,1) forwards; }
+@keyframes sailLeft {
+  0% { transform: translateX(-50%) rotate(0); }
+  25% { transform: translateX(calc(-50% - min(21vw, 168px))) rotate(-25deg); }
+  62% { transform: translateX(calc(-50% - min(21vw, 168px))) rotate(3deg); }
+  100% { transform: translateX(-50%) rotate(0); }
+}
+@keyframes sailRight {
+  0% { transform: translateX(-50%) rotate(0); }
+  25% { transform: translateX(calc(-50% + min(21vw, 168px))) rotate(25deg); }
+  62% { transform: translateX(calc(-50% + min(21vw, 168px))) rotate(-3deg); }
+  100% { transform: translateX(-50%) rotate(0); }
+}
+
+.boat.hit { animation: hitAnimation 0.2s ease 8; }
+.boat.hit .hull { filter: drop-shadow(0 0 20px #ff1100) brightness(1.5); }
+@keyframes hitAnimation {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  25% { transform: translateX(calc(-50% - 15px)) scale(1.1) rotate(-8deg); }
+  75% { transform: translateX(calc(-50% + 15px)) scale(1.1) rotate(8deg); }
+}
+
+/* Яркий момент столкновения */
+.river-world.collision:after { content: "💥"; position: absolute; z-index: 39; left: 50%; top: 66%; transform: translate(-50%, -50%); font-size: clamp(100px, 25vw, 200px); pointer-events: none; animation: crashFlash .75s ease-out forwards; text-shadow: 0 0 20px #ff7700; }
+@keyframes crashFlash {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.1) rotate(-20deg); }
+  20% { opacity: 1; transform: translate(-50%, -50%) scale(1.4) rotate(12deg); filter: brightness(1.3); }
+  60% { opacity: 1; transform: translate(-50%, -50%) scale(1.0) rotate(-6deg); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.6); }
+}
+
+.boat.sink { animation: sink 1.8s forwards!important; }
+@keyframes sink {
+  30% { transform: translateX(var(--sink-x, -50%)) rotate(15deg) scale(.9); }
+  100% { transform: translateX(var(--sink-x, -50%)) rotate(85deg) scale(.2); opacity: 0; bottom: 33%; }
+}
+
+.obstacle { position: absolute; z-index: 17; top: 18%; font-size: clamp(55px, 11vw, 85px); filter: drop-shadow(0 6px 4px #184b5c66); opacity: 0; transform: scale(.3); }
+.obstacle.left { left: calc(50% - min(25vw, 195px)); }
+.obstacle.right { right: calc(50% - min(25vw, 195px)); }
+.obstacle.show { animation: obstacleApproach 3.35s cubic-bezier(.25,.55,.4,1) forwards; }
+@keyframes obstacleApproach {
+  0% { top: 13%; transform: scale(.25); opacity: 0; }
+  10% { opacity: 1; }
+  38% { top: 35%; transform: scale(.65); opacity: 1; }
+  72% { top: 58%; transform: scale(.95); opacity: 1; }
+  88%, 100% { top: 72%; transform: scale(1.25); opacity: 1; }
+}
+
+.message { position: absolute; z-index: 40; left: 50%; top: 48%; transform: translate(-50%, -50%) scale(.7); font-size: clamp(26px, 8vw, 52px); font-weight: 1000; padding: 12px 28px; border-radius: 24px; background: #fff; color: var(--ink); box-shadow: 0 10px 30px #17324d55; opacity: 0; transition: .2s; white-space: nowrap; }
+.message.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.shore { position: absolute; z-index: 8; bottom: 1%; left: 15px; font-size: 45px; }
+.shore.r { left: auto; right: 15px; }
+
+.end .big-title { font-size: clamp(48px, 10vw, 72px); font-weight: 1000; margin: 10px 0; letter-spacing: -1px; text-shadow: 0 4px 0 #fff; }
+.end.win-screen .big-title { color: #218a5b; }
+.end.lose-screen .big-title { color: #d34c41; }
+
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 25px 0; }
+.stat { background: #edf8fb; border-radius: 18px; padding: 14px 6px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.03); }
+.stat b { display: block; font-size: 32px; color: #17638a; font-weight: 900; }
+.small { font-size: 13px; color: #5c7283; font-weight: 700; }
+.buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 15px; }
+.buttons .primary, .buttons .secondary { padding: 16px 36px; font-size: 20px; }
+
+.sound { position: fixed; z-index: 100; right: 12px; bottom: 12px; width: 48px; height: 48px; border: 0; border-radius: 50%; background: #ffd75a; color: #17324d; font-size: 22px; box-shadow: 0 5px 15px #17324d44; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+/* Чистая типографика: ни у одного текста нет тени */
+*, *::before, *::after { text-shadow: none !important; }
+
+/* Тексты располагаются прямо на иллюстрациях, без белых подложек */
+.card { background: transparent; border-color: transparent; box-shadow: none; }
+.rules-list { background: transparent; padding-top: 8px; padding-bottom: 8px; }
+.mode-btn-large { background: rgba(89,195,230,.22); border-color: #3a9dc0; }
+.mode-btn-large.selected { background: #ffe27a; }
+.question-box { background: transparent; border-color: transparent; box-shadow: none; }
+/* Контрастный вопрос в шторме: мягкое затемнение без обводки букв */
+.river-world.storm .question-box {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  isolation: isolate;
+}
+.river-world.storm .question-box::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 2px 4%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(7, 28, 43, .38) 0%, rgba(7, 28, 43, .23) 52%, rgba(7, 28, 43, 0) 80%);
+  filter: blur(13px);
+  pointer-events: none;
+}
+.river-world.storm .example { color: #fff7bd; -webkit-text-stroke: 0; paint-order: normal; }
+.river-world.storm .prompt { color: #ffffff; -webkit-text-stroke: 0; paint-order: normal; }
+.message { background: transparent; box-shadow: none; padding: 8px; }
+.answer { background: #ffe27a; border-color: #e7a522; box-shadow: 0 8px 0 #c17c16; }
+.answer.correct { border-color: #42a568; }
+.stat { background: rgba(18,67,91,.78); box-shadow: none; color: #fff; }
+.stat b, .stat .small { color: #fff; }
+
+/* Крупные и хорошо читаемые кнопки стартовых экранов */
+#toRulesBtn, #toModesBtn, #startBtn {
+  min-width: min(390px, 88vw);
+  padding: 20px 44px;
+  font-size: clamp(28px, 5.5vw, 40px);
+  line-height: 1.05;
+}
+
+/* Живое солнце с отдельными вращающимися светящимися лучами */
+.junior-sun {
+  background: radial-gradient(circle at 38% 34%, #fffbd0 0 8%, #ffe95c 20%, #ffc928 70%);
+  box-shadow: 0 0 24px 10px rgba(255,231,72,.72), 0 0 70px 25px rgba(255,241,119,.4);
+  isolation: isolate;
+}
+.junior-sun::before {
+  content: "😊";
+  z-index: 2;
+  font-size: clamp(27px, 5vw, 42px);
+  animation: sunFace 2.4s ease-in-out infinite;
+}
+.junior-sun::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -38%;
+  background: repeating-conic-gradient(from 0deg, #ffe14b 0 7deg, transparent 7deg 20deg);
+  -webkit-mask: radial-gradient(circle, transparent 0 48%, #000 50%);
+  mask: radial-gradient(circle, transparent 0 48%, #000 50%);
+  animation: sunRays 9s linear infinite, rayGlow 1.8s ease-in-out infinite alternate;
+}
+@keyframes sunRays { to { transform: rotate(360deg); } }
+@keyframes rayGlow { to { inset: -50%; opacity: .68; } }
+@keyframes sunFace { 50% { transform: scale(1.08) rotate(-5deg); } }
+
+/* Финиш на реке: появляется только после прохождения 15-го задания */
+.finish-scene { position: absolute; z-index: 12; inset: 0; opacity: 0; visibility: hidden; pointer-events: none; overflow: hidden; }
+.finish-scene.show { opacity: 1; visibility: visible; animation: finishWorld 5.2s ease-out both; }
+.finish-scene:not(.show) * { animation: none !important; }
+.finish-ribbon { position: absolute; z-index: 16; left: 50%; top: 62%; width: min(50vw,430px); min-width: 230px; height: 24px; transform: translateX(-50%); background: repeating-linear-gradient(90deg,#fff 0 26px,#e94f4f 26px 52px); border-top: 4px solid #17324d; border-bottom: 4px solid #17324d; }
+.finish-ribbon::before, .finish-ribbon::after { content:""; position:absolute; top:-34px; width:10px; height:92px; background:#734027; border-radius:5px; }
+.finish-ribbon::before { left:-7px; } .finish-ribbon::after { right:-7px; }
+.finish-scene.show .finish-ribbon { animation: ribbonBreak 1s 2.65s ease-out forwards; }
+@keyframes ribbonBreak { 45% { transform: translateX(-50%) scaleX(1); } 100% { transform: translateX(-50%) scaleX(.12) translateY(42px); opacity:0; } }
+.finish-dock { position:absolute; z-index:14; right:calc(50% - min(39vw,335px)); top:34%; width:min(34vw,280px); height:105px; background:repeating-linear-gradient(0deg,#8c512e 0 17px,#b87542 17px 34px); border:8px solid #63381f; border-right:0; border-radius:18px 0 0 18px; transform:perspective(220px) rotateX(7deg); }
+.finish-dock::before { content:"ПРИСТАНЬ"; position:absolute; top:-55px; left:22px; padding:8px 13px; border:5px solid #704226; background:#ffd75a; color:#17324d; font-weight:1000; font-size:clamp(15px,3vw,23px); transform:rotate(-2deg); }
+@keyframes finishWorld { 0% { opacity:0; transform:translateY(-24vh) scale(.82); } 14% { opacity:1; } 100% { opacity:1; transform:translateY(0) scale(1); } }
+.boat.finish-sail { animation: finishSail 5.2s cubic-bezier(.3,.65,.25,1) forwards !important; }
+@keyframes finishSail { 0% { bottom:6%; transform:translateX(-50%); } 58% { bottom:31%; transform:translateX(-50%); } 78% { bottom:42%; transform:translateX(-24%) rotate(20deg); } 100% { bottom:46%; transform:translateX(75%) rotate(88deg); } }
+
+/* Полноэкранные финалы без карточек и белых прямоугольников */
+.end { padding:0; overflow:hidden; }
+.end.win-screen { background: linear-gradient(#7cddf2 0 48%,#42b9dd 48% 73%,#79c957 73%); }
+.end.lose-screen { background: linear-gradient(#092943 0,#0d5475 45%,#157b8a 78%,#8c7755 78%); }
+.end-scene { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+.end-scene::before { content:""; position:absolute; inset:0; opacity:0; }
+.win-screen .end-scene::before { opacity:1; background:radial-gradient(circle at 82% 15%,#ffe458 0 7%,transparent 7.4%),radial-gradient(ellipse at 16% 18%,#fff 0 5%,transparent 5.4%),radial-gradient(ellipse at 22% 18%,#fff 0 4%,transparent 4.4%); }
+.lose-screen .end-scene::before { opacity:1; background:radial-gradient(circle at 17% 28%,transparent 0 6px,#bdefff 7px 9px,transparent 10px),radial-gradient(circle at 73% 44%,transparent 0 4px,#bdefff 5px 7px,transparent 8px),linear-gradient(165deg,transparent 0 45%,rgba(145,235,255,.14) 46% 49%,transparent 50%); }
+.end-content { position:relative; z-index:3; width:min(880px,94vw); min-height:100%; margin:auto; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px 16px; text-align:center; }
+.end-icon { font-size:clamp(150px,28vw,260px); line-height:1; animation:endHeroIn .85s cubic-bezier(.2,.9,.25,1.25) both; }
+.win-screen .end-icon { filter:drop-shadow(0 12px 0 rgba(126,79,10,.22)); }
+.lose-screen .end-icon { transform:rotate(82deg); filter:saturate(.7) brightness(.72); animation:boatBottomIn 1.5s ease-out both; }
+.lose-screen .end-scene::after { content:"🌿   🪸   🌿   🐚   🌿"; position:absolute; left:0; right:0; bottom:2%; font-size:clamp(42px,8vw,80px); text-align:center; letter-spacing:2vw; }
+.end .big-title { color:#17324d; font-size:clamp(52px,11vw,104px); line-height:.9; margin:0; text-transform:uppercase; animation:endTitleIn .7s .35s ease-out both; }
+.win-screen .big-title { color:#155b3e; }
+.lose-screen .big-title { color:#fff; }
+.end #endText { color:#17324d !important; font-size:clamp(18px,3vw,25px); margin:12px 0 4px; animation:lowerReveal .6s 1.8s both; }
+.lose-screen #endText { color:#e4f8ff !important; }
+.end-lower { width:min(700px,94vw); animation:lowerReveal .75s 2.1s ease-out both; }
+.end .stats { margin:14px 0; }
+.end .buttons .secondary { background:#54c9e8; border-color:#17638a; color:#123f55; }
+@keyframes endHeroIn { from { opacity:0; transform:translateY(35px) scale(.45) rotate(-12deg); } }
+@keyframes boatBottomIn { from { opacity:0; transform:translateY(-45vh) rotate(15deg) scale(1.25); } to { opacity:1; transform:translateY(0) rotate(82deg) scale(1); } }
+@keyframes endTitleIn { from { opacity:0; transform:scale(.65); } }
+@keyframes lowerReveal { from { opacity:0; transform:translateY(45px); } to { opacity:1; transform:none; } }
+
+@media(max-height: 660px) {
+  .question-box { top: 11%; padding: 6px 12px; }
+  .answers { top: 66%; gap: 15px; }
+  .answer { height: 96px; font-size: clamp(70px, 14vw, 110px); }
+  .fork { top: 27%; }
+  .boat { height: 100px; width: 60px; }
+  .inside { left: 11px; right: 11px; }
+  .card { padding: 16px; }
+  .logo-illus { height: 90px; }
+  .sloogan { margin-bottom: 12px; }
+}
+@media(max-width: 520px) {
+  .hud { grid-template-columns: 1fr auto; }
+  .title { display: none; }
+  .question-box { top: 13%; }
+  .answer:first-child:before, .answer:last-child:after { font-size: 24px; left: 10px; }
+  .answer:last-child:after { right: 10px; }
+  .fork { width: 110vw; }
+  .stats { gap: 6px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ЭКРАН 1: Приветствие / Splash -->
+  <section class="screen active" id="splashScreen">
+    <div class="card splash-card">
+      <svg class="splash-art" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="splashSky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#65d8f2"/><stop offset="1" stop-color="#fff3a4"/></linearGradient>
+          <linearGradient id="splashRiver" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#269bc8"/><stop offset=".5" stop-color="#76e0f4"/><stop offset="1" stop-color="#269bc8"/></linearGradient>
+          <filter id="splashShadow"><feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#13516e" flood-opacity=".35"/></filter>
+        </defs>
+        <rect width="1000" height="700" fill="url(#splashSky)"/>
+        <circle cx="830" cy="115" r="70" fill="#ffe35a" opacity=".98"/>
+        <g fill="#fff" opacity=".85"><ellipse cx="150" cy="105" rx="78" ry="25"/><ellipse cx="215" cy="105" rx="53" ry="19"/><ellipse cx="530" cy="82" rx="70" ry="22"/><ellipse cx="585" cy="84" rx="45" ry="16"/></g>
+        <path d="M0 260 C190 205 315 270 435 340 C325 420 295 520 260 700 H0Z" fill="#73c94f"/>
+        <path d="M1000 245 C810 205 665 275 565 340 C675 430 720 535 755 700 H1000Z" fill="#87d65c"/>
+        <path d="M435 250 C510 285 555 300 565 340 C595 420 680 520 755 700 H260 C335 515 415 425 435 340 C447 300 405 280 435 250Z" fill="url(#splashRiver)"/>
+        <path d="M485 280 C505 330 477 385 430 455 C390 520 360 590 340 700" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-dasharray="25 32" opacity=".28"/>
+        <g font-size="50"><text x="80" y="355">🌳</text><text x="175" y="540">🌼</text><text x="835" y="370">🌳</text><text x="895" y="565">🌻</text><text x="105" y="625">🦋</text><text x="815" y="520">🦋</text></g>
+        <g transform="translate(505 520) rotate(-6)" filter="url(#splashShadow)">
+          <path d="M0 -75 C45 -58 58 35 38 83 C16 100 -16 100 -38 83 C-58 35 -45 -58 0 -75Z" fill="#c95f2d" stroke="#71341d" stroke-width="9"/>
+          <path d="M0 -48 C27 -36 31 37 20 61 C8 70 -8 70 -20 61 C-31 37 -27 -36 0 -48Z" fill="#ffd36a" stroke="#71341d" stroke-width="6"/>
+          <path d="M-27 -5 H27 M-23 37 H23" stroke="#71341d" stroke-width="8" stroke-linecap="round"/>
+        </g>
+      </svg>
+      <div class="splash-overlay">
+        <h1>Речное<br><span>умножение</span></h1>
+        <div class="sloogan">Доплыви до финиша, прокачай знания таблицы умножения!</div>
+        <button class="primary" id="toRulesBtn">Играть</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ЭКРАН 2: Правила -->
+  <section class="screen" id="rulesScreen">
+    <div class="card">
+      <div class="rules-title">📜 Правила приключения</div>
+      <ol class="rules-list">
+        <li>Перед тобой река с развилками. Каждая развилка — это пример из таблицы умножения.</li>
+        <li>По бокам каналов написаны ответы. Направляй лодку в канал с верным ответом.</li>
+        <li>Ошибся или не успел? Лодка врежется в барьер и получит повреждение!</li>
+        <li>После трёх повреждений лодка тонет. Твоя цель — пройти все 15 раундов!</li>
+      </ol>
+      <button class="primary" id="toModesBtn">Выбрать уровень</button>
+    </div>
+  </section>
+
+  <!-- ЭКРАН 3: Выбор режима -->
+  <section class="screen" id="modesScreen">
+    <div class="card">
+      <div class="mode-title">Выберите режим игры</div>
+      
+      <div class="mode-picker-large" role="radiogroup" aria-label="Уровень сложности">
+        <button class="mode-btn-large" data-mode="junior">
+          <span class="ico">🧢</span>
+          <div class="details">
+            <span class="m-title">Юнга</span>
+            <span class="m-desc">Юнга — без таймера</span>
+          </div>
+        </button>
+        
+        <button class="mode-btn-large selected" data-mode="captain">
+          <span class="ico">⚓</span>
+          <div class="details">
+            <span class="m-title">Капитан</span>
+            <span class="m-desc">Капитан — есть время подумать</span>
+          </div>
+        </button>
+        
+        <button class="mode-btn-large" data-mode="wolf">
+          <span class="ico">🌊</span>
+          <div class="details">
+            <span class="m-title">Морской волк</span>
+            <span class="m-desc">Морской волк — время на ответ ограничено</span>
+          </div>
+        </button>
+      </div>
+
+      <button class="primary" id="startBtn">Старт</button>
+    </div>
+  </section>
+
+  <!-- ИГРОВОЙ ЭКРАН -->
+  <section class="screen game" id="gameScreen">
+    <div class="hud">
+      <div>
+        <div class="progress" id="progressText">Пример 1 из 15</div>
+        <div class="progressbar"><i id="progressFill"></i></div>
+      </div>
+      <div class="title">Речное умножение</div>
+      <div class="hud-right">
+        <div class="hearts" id="hearts">
+          <span class="heart">❤️</span><span class="heart">❤️</span><span class="heart">❤️</span>
+        </div>
+        <button class="exit-btn" id="exitBtn">Выход ❌</button>
+      </div>
+    </div>
+    
+    <div class="river-world" id="world">
+      <div class="junior-sun"></div>
+      <div class="butterflies-box">
+        <div class="bfly">🦋</div>
+        <div class="bfly">🦋</div>
+        <div class="bfly">🦋</div>
+      </div>
+      
+      <div class="river"></div>
+      <div class="bank-detail"></div>
+      <div class="shore">🌿🌼</div>
+      <div class="shore r">🌾🌳</div>
+
+      <div class="finish-scene" id="finishScene" aria-hidden="true">
+        <div class="finish-ribbon"></div>
+        <div class="finish-dock"></div>
+      </div>
+      
+      <div class="fork" id="fork"></div>
+      
+      <div class="question-box" id="questionBox">
+        <div class="prompt" id="prompt">Запомни пример!</div>
+        <div class="example" id="example">6 × 7 = ?</div>
+        <div class="timer"><i id="timerBar"></i></div>
+      </div>
+      
+      <div class="answers" id="answers">
+        <button class="answer" id="leftAnswer" data-side="left">42</button>
+        <button class="answer" id="rightAnswer" data-side="right">36</button>
+      </div>
+      
+      <div class="obstacle" id="obstacle">🪨</div>
+      <div class="message" id="message">Верно!</div>
+      
+      <div class="boat" id="boat">
+        <div class="wake"></div>
+        <div class="hull">
+          <div class="inside">
+            <i class="seat a"></i>
+            <i class="seat b"></i>
+          </div>
+          <b class="damage-mark d1" id="crack1">ϟ</b>
+          <b class="damage-mark d2" id="crack2">ϟ</b>
+          <b class="damage-mark d3" id="crack3">✖</b>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ФИНАЛЬНЫЙ ЭКРАН -->
+  <section class="screen end" id="endScreen">
+    <div class="end-scene" aria-hidden="true"></div>
+    <div class="end-content">
+      <div class="end-icon" id="endIcon">🏆</div>
+      <div class="big-title" id="endTitle">Победа!</div>
+      <p class="sloogan" id="endText">Лодка добралась до пристани.</p>
+      <div class="end-lower">
+        <div class="stats">
+          <div class="stat"><b id="rightStat">0</b><span class="small">верных</span></div>
+          <div class="stat"><b id="wrongStat">0</b><span class="small">ошибок</span></div>
+          <div class="stat"><b id="bestStat">0</b><span class="small">рекорд</span></div>
+        </div>
+        <div class="buttons">
+          <button class="primary" id="againBtn">Плыть ещё раз</button>
+          <button class="secondary" id="homeBtn">На главную</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <button class="sound" id="soundBtn" aria-label="Звук">🔊</button>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const screens = {
+  splash: $('splashScreen'),
+  rules: $('rulesScreen'),
+  modes: $('modesScreen'),
+  game: $('gameScreen'),
+  end: $('endScreen')
+};
+const els = {
+  world: $('world'),
+  boat: $('boat'),
+  fork: $('fork'),
+  q: $('questionBox'),
+  prompt: $('prompt'),
+  example: $('example'),
+  answers: $('answers'),
+  left: $('leftAnswer'),
+  right: $('rightAnswer'),
+  timer: $('timerBar'),
+  obstacle: $('obstacle'),
+  message: $('message'),
+  hearts: $('hearts'),
+  progress: $('progressText'),
+  fill: $('progressFill'),
+  finish: $('finishScene')
+};
+
+const modes = {
+  junior: { name: 'Юнга', total: 0, read: 0 },
+  captain: { name: 'Капитан', total: 5000, read: 2000 },
+  wolf: { name: 'Морской волк', total: 3000, read: 1000 }
+};
+
+let state = {
+  round: 0,
+  damage: 0,
+  right: 0,
+  questions: [],
+  locked: true,
+  timer: null,
+  sound: true,
+  tickTimers: [],
+  mode: 'captain'
+};
+
+const obstacles = ['🪨', '🛢️', '🪵', '🌾', '🪨'];
+const forkShapes = [
+  { inlet:'M380 -55 L380 72', left:'M380 62 C320 82 184 96 158 184 C135 265 244 306 380 330', right:'M380 62 C430 84 500 105 520 176 C548 270 486 300 380 330', outlet:'M380 320 L380 455', island:'M327 112 L425 96 L470 145 L466 239 L412 292 L300 274 L254 212 L276 143 Z', tree:[365,172], rock:[405,238] },
+  { inlet:'M380 -55 C370 5 385 38 380 78', left:'M380 68 C286 80 215 122 207 198 C199 270 270 300 380 326', right:'M380 68 C472 95 604 115 612 210 C618 280 510 316 380 326', outlet:'M380 316 C388 360 372 405 380 455', island:'M320 111 L443 119 L500 174 L472 271 L392 294 L286 260 L267 178 Z', tree:[369,177], rock:[414,246] },
+  { inlet:'M380 -55 L380 75', left:'M380 65 C328 100 145 126 132 218 C124 282 250 310 380 334', right:'M380 65 C452 78 517 110 532 166 C558 262 492 313 380 334', outlet:'M380 324 L380 455', island:'M306 120 L402 103 L468 141 L480 226 L427 292 L310 278 L244 223 L259 158 Z', tree:[340,179], rock:[403,242] },
+  { inlet:'M380 -55 C390 8 366 42 380 79', left:'M380 68 C304 81 230 94 196 159 C148 251 255 308 380 329', right:'M380 68 C491 98 594 152 575 235 C559 298 475 314 380 329', outlet:'M380 319 C367 366 390 410 380 455', island:'M316 108 L425 120 L496 184 L456 270 L378 294 L275 257 L249 179 Z', tree:[365,167], rock:[407,247] },
+  { inlet:'M380 -55 L380 73', left:'M380 63 C260 85 151 126 170 219 C187 288 276 310 380 331', right:'M380 63 C438 91 531 116 554 194 C577 271 498 315 380 331', outlet:'M380 321 L380 455', island:'M304 116 L414 105 L484 158 L478 232 L416 291 L298 270 L244 207 L263 148 Z', tree:[351,174], rock:[411,238] }
+];
+
+function renderFork() {
+  const f = forkShapes[state.round % forkShapes.length];
+  const paths = [f.inlet, f.left, f.right, f.outlet];
+  const edge = p => `<path class="water-edge" d="${p}"/>`;
+  const water = p => `<path class="water-path" d="${p}"/>`;
+  const shine = p => `<path class="water-shine" d="${p}"/>`;
+  const current = p => `<path class="water-current" d="${p}"/><path class="water-current alt" d="${p}"/>`;
+  const [tx, ty] = f.tree;
+  const [rx, ry] = f.rock;
+  els.fork.innerHTML = `<svg viewBox="0 0 760 400" preserveAspectRatio="none" aria-hidden="true">
+    <rect class="fork-base" x="0" y="-60" width="760" height="520"/>
+    ${paths.map(edge).join('')}
+    ${paths.map(water).join('')}
+    ${paths.map(shine).join('')}
+    ${paths.map(current).join('')}
+    <path class="fork-island" d="${f.island}"/>
+    <path class="island-tree-trunk" d="M${tx} ${ty + 18} L${tx} ${ty + 48}"/>
+    <circle class="island-tree" cx="${tx}" cy="${ty}" r="29"/>
+    <circle class="island-tree" cx="${tx - 20}" cy="${ty + 14}" r="22"/>
+    <circle class="island-tree" cx="${tx + 21}" cy="${ty + 13}" r="23"/>
+    <path class="island-rock" d="M${rx - 24} ${ry + 17} L${rx - 13} ${ry - 18} L${rx + 16} ${ry - 25} L${rx + 30} ${ry + 12} L${rx + 8} ${ry + 25} Z"/>
+    <g transform="translate(365 104)">
+      <rect class="channel-sign" x="0" y="0" width="31" height="31" rx="4"/>
+      <path class="channel-arrow" d="M22 8 L10 16 L22 24 M9 16 H25"/>
+    </g>
+  </svg>`;
+}
+
+let audioCtx, ambient = { nodes: [], musicTimer: null, note: 0 };
+
+function ensureAudio() {
+  audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function tone(freq, dur, type = 'sine', vol = 0.08) {
+  if (!state.sound) return;
+  try {
+    const ctx = ensureAudio();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = type;
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    o.connect(g).connect(ctx.destination);
+    o.start();
+    o.stop(ctx.currentTime + dur);
+  } catch (e) {}
+}
+
+function timerTick(step) {
+  tone([620, 700, 820][step] || 820, 0.16, 'sine', 0.045);
+}
+
+function softNote() {
+  if (!state.sound || !audioCtx) return;
+  const storm = state.mode === 'wolf';
+  const notes = storm 
+    ? [196, 233.08, 207.65, 174.61, 196, 246.94, 220, 164.81] 
+    : [261.63, 329.63, 392, 329.63, 293.66, 349.23, 440, 349.23];
+  
+  const ctx = audioCtx;
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = storm ? 'triangle' : 'sine';
+  o.frequency.value = notes[ambient.note++ % notes.length];
+  o.detune.value = (ambient.note % 2 ? 5 : -5);
+  
+  g.gain.setValueAtTime(0.001, ctx.currentTime);
+  g.gain.linearRampToValueAtTime(storm ? 0.042 : 0.024, ctx.currentTime + 0.1);
+  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (storm ? 0.7 : 1.2));
+  
+  o.connect(g).connect(ctx.destination);
+  o.start();
+  o.stop(ctx.currentTime + (storm ? 0.75 : 1.25));
+}
+
+function startAmbient() {
+  if (!state.sound || ambient.nodes.length) return;
+  try {
+    const ctx = ensureAudio();
+    const seconds = 2;
+    const buffer = ctx.createBuffer(1, ctx.sampleRate * seconds, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    let last = 0;
+    for (let i = 0; i < data.length; i++) {
+      const white = Math.random() * 2 - 1;
+      last = 0.985 * last + 0.015 * white;
+      data[i] = last * 3;
+    }
+    
+    const water = ctx.createBufferSource();
+    const band = ctx.createBiquadFilter();
+    const low = ctx.createBiquadFilter();
+    const gain = ctx.createGain();
+    const lfo = ctx.createOscillator();
+    const lfoGain = ctx.createGain();
+    
+    water.buffer = buffer;
+    water.loop = true;
+    band.type = 'bandpass';
+    band.frequency.value = 900;
+    band.Q.value = 0.7;
+    low.type = 'lowpass';
+    low.frequency.value = 1800;
+    gain.gain.value = 0.05;
+    lfo.frequency.value = 0.16;
+    lfoGain.gain.value = 0.012;
+    
+    lfo.connect(lfoGain).connect(gain.gain);
+    water.connect(band).connect(low).connect(gain).connect(ctx.destination);
+    
+    water.start();
+    lfo.start();
+    gain.gain.value = state.mode === 'wolf' ? 0.085 : 0.05;
+    
+    ambient.nodes = [water, lfo, gain];
+    softNote();
+    ambient.musicTimer = setInterval(softNote, state.mode === 'wolf' ? 650 : 1200);
+  } catch (e) {}
+}
+
+function stopAmbient() {
+  if (ambient.musicTimer) clearInterval(ambient.musicTimer);
+  ambient.musicTimer = null;
+  ambient.nodes.forEach(n => {
+    try { if (n.stop) n.stop(); } catch (e) {}
+    try { n.disconnect(); } catch (e) {}
+  });
+  ambient.nodes = [];
+}
+
+function show(name) {
+  Object.keys(screens).forEach(k => screens[k].classList.remove('active'));
+  screens[name].classList.add('active');
+  if (name !== 'game') {
+    stopAmbient();
+    els.world.className = 'river-world';
+  }
+}
+
+function setMode(mode) {
+  state.mode = mode;
+  document.querySelectorAll('.mode-btn-large').forEach(b => 
+    b.classList.toggle('selected', b.dataset.mode === mode)
+  );
+}
+
+function makeQuestions() {
+  const all = [];
+  for (let a = 2; a <= 9; a++) {
+    for (let b = 2; b <= 9; b++) {
+      all.push({ a, b, answer: a * b });
+    }
+  }
+  for (let i = all.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [all[i], all[j]] = [all[j], all[i]];
+  }
+  return all.slice(0, 15);
+}
+
+function wrongFor(q) {
+  let candidates = [
+    q.answer + q.a, q.answer - q.a, 
+    q.answer + q.b, q.answer - q.b, 
+    q.answer + 1, q.answer - 1
+  ].filter(n => n > 0 && n !== q.answer);
+  return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+function start() {
+  state.round = 0;
+  state.damage = 0;
+  state.right = 0;
+  state.questions = makeQuestions();
+  state.locked = true;
+  clearTimeout(state.timer);
+  state.tickTimers.forEach(clearTimeout);
+  state.tickTimers = [];
+  stopAmbient();
+  
+  els.world.className = 'river-world';
+  els.finish.classList.remove('show');
+  if (state.mode === 'wolf') els.world.classList.add('storm');
+  if (state.mode === 'junior') {
+    els.world.classList.add('junior-theme');
+    els.world.classList.add('no-timer');
+  }
+  
+  startAmbient();
+  show('game');
+  updateDamage();
+  // Короткая пауза перед первым вопросом: игрок успевает осмотреться и сориентироваться.
+  setTimeout(loadRound, 2750);
+}
+
+function resetScene() {
+  state.tickTimers.forEach(clearTimeout);
+  state.tickTimers = [];
+  els.world.classList.remove('cruising', 'collision', 'flash');
+  els.finish.classList.remove('show');
+  els.boat.className = 'boat';
+  els.obstacle.className = 'obstacle';
+  els.fork.className = 'fork';
+  els.q.classList.remove('show');
+  els.answers.classList.remove('show');
+  els.left.className = 'answer';
+  els.right.className = 'answer';
+  els.message.classList.remove('show');
+  els.timer.classList.remove('running');
+  els.timer.style.removeProperty('--time-total');
+  void els.timer.offsetWidth;
+}
+
+function startAnswerPhase() {
+  if (state.round >= 15 || !screens.game.classList.contains('active')) return;
+  els.prompt.textContent = 'Выбери правильный ответ!';
+  els.answers.classList.add('show');
+  state.locked = false;
+}
+
+function loadRound() {
+  if (state.round >= 15) {
+    playVictorySequence();
+    return;
+  }
+  resetScene();
+  renderFork();
+  
+  if (state.mode === 'wolf' && Math.random() < 0.42) {
+    setTimeout(() => els.world.classList.add('flash'), 80);
+    setTimeout(() => els.world.classList.remove('flash'), 700);
+  }
+  
+  const q = state.questions[state.round];
+  const correctLeft = Math.random() < 0.5;
+  const wrong = wrongFor(q);
+  
+  els.example.textContent = `${q.a} × ${q.b} = ?`;
+  els.left.textContent = correctLeft ? q.answer : wrong;
+  els.right.textContent = correctLeft ? wrong : q.answer;
+  els.left.dataset.correct = correctLeft ? '1' : '0';
+  els.right.dataset.correct = correctLeft ? '0' : '1';
+  
+  els.progress.textContent = `Пример ${state.round + 1} из 15`;
+  els.fill.style.width = `${(state.round / 15) * 100}%`;
+  els.prompt.textContent = state.mode === 'junior' ? 'Реши пример и выбери ответ!' : 'Запомни пример!';
+  
+  state.locked = true;
+  
+  setTimeout(() => {
+    els.fork.classList.add('show');
+    els.q.classList.add('show');
+    
+    const mode = modes[state.mode];
+    if (!mode.total) { // режим юнга
+      startAnswerPhase();
+      return;
+    }
+    
+    els.timer.style.setProperty('--time-total', mode.total / 1000 + 's');
+    els.timer.classList.add('running');
+    
+    timerTick(0);
+    state.tickTimers = [];
+    for (let ms = 1000; ms < mode.total; ms += 1000) {
+      state.tickTimers.push(setTimeout(() => timerTick(Math.floor(ms / 1000)), ms));
+    }
+    
+    state.tickTimers.push(setTimeout(startAnswerPhase, mode.read));
+    
+    state.timer = setTimeout(() => {
+      if (!state.locked) timeout();
+    }, mode.total);
+  }, 250);
+}
+
+function choose(side, timeoutFlag = false) {
+  if (state.locked) return;
+  state.locked = true;
+  clearTimeout(state.timer);
+  state.tickTimers.forEach(clearTimeout);
+  state.tickTimers = [];
+  els.timer.classList.remove('running');
+  
+  const btn = side === 'left' ? els.left : els.right;
+  let correct = !timeoutFlag && btn.dataset.correct === '1';
+  
+  if (timeoutFlag) {
+    side = Math.random() < 0.5 ? 'left' : 'right';
+    els.message.textContent = 'Время вышло!';
+    els.message.style.color = '#d34c41';
+  } else if (correct) {
+    els.message.textContent = 'Верно!';
+    els.message.style.color = '#218a5b';
+  } else {
+    els.message.textContent = 'Ой, ошибка!';
+    els.message.style.color = '#d34c41';
+  }
+  
+  els.answers.classList.remove('show');
+  els.q.classList.remove('show');
+  els.world.classList.add('cruising');
+  els.fork.classList.add('travel');
+  els.boat.classList.add(side);
+  els.message.classList.add('show');
+  
+  if (correct) {
+    btn.classList.add('correct');
+    state.right++;
+    tone(660, 0.12);
+    setTimeout(() => tone(880, 0.18), 100);
+    
+    // Пакет анимации проплыва вперед
+    setTimeout(() => els.message.classList.remove('show'), 1450);
+    setTimeout(() => {
+      state.round++;
+      loadRound();
+    }, 4400);
+  } else {
+    if (!timeoutFlag) btn.classList.add('wrong');
+    state.damage++;
+    els.obstacle.textContent = obstacles[Math.floor(Math.random() * obstacles.length)];
+    
+    setTimeout(() => {
+      els.obstacle.className = `obstacle ${side} show`;
+    }, 220);
+    
+    // Замедляем сам момент столкновения с барьером
+    setTimeout(() => {
+      els.boat.classList.add('hit');
+      els.world.classList.add('collision');
+      tone(82, 0.5, 'sawtooth', 0.18);
+      setTimeout(() => tone(48, 0.35, 'square', 0.1), 80);
+      updateDamage();
+      setTimeout(() => els.world.classList.remove('collision'), 900);
+    }, 2900);
+    
+    setTimeout(() => els.message.classList.remove('show'), 1450);
+    setTimeout(() => {
+      state.round++;
+      if (state.damage >= 3) {
+        els.boat.style.setProperty('--sink-x', '-50%');
+        els.boat.classList.add('sink');
+        tone(80, 1.2, 'sawtooth', 0.12);
+        setTimeout(() => playJingle(false), 1600);
+      } else {
+        loadRound();
+      }
+    }, 4400);
+  }
+}
+
+function timeout() {
+  if (state.locked) return;
+  choose(Math.random() < 0.5 ? 'left' : 'right', true);
+}
+
+function updateDamage() {
+  [1, 2, 3].forEach(i => {
+    $('crack' + i).style.display = (state.damage >= i) ? 'block' : 'none';
+  });
+  [...els.hearts.children].forEach((h, i) => h.classList.toggle('off', i >= 3 - state.damage));
+}
+
+function playVictorySequence() {
+  clearTimeout(state.timer);
+  state.tickTimers.forEach(clearTimeout);
+  state.tickTimers = [];
+  state.locked = true;
+  resetScene();
+  els.fill.style.width = '100%';
+  els.progress.textContent = 'Финиш — 15 из 15!';
+  els.world.classList.add('cruising');
+  els.finish.classList.add('show');
+  els.boat.classList.add('finish-sail');
+  tone(523, .16, 'sine', .08);
+  setTimeout(() => tone(659, .16, 'sine', .08), 450);
+  setTimeout(() => tone(784, .22, 'sine', .09), 900);
+  setTimeout(() => playJingle(true), 5450);
+}
+
+function playJingle(success) {
+  clearTimeout(state.timer);
+  stopAmbient();
+  
+  const best = Math.max(Number(localStorage.getItem('riverMultiplyBest') || 0), state.right);
+  localStorage.setItem('riverMultiplyBest', best);
+  
+  $('rightStat').textContent = state.right;
+  $('wrongStat').textContent = state.damage;
+  $('bestStat').textContent = best;
+  
+  if (success) {
+    screens.end.className = "screen end win-screen";
+    $('endIcon').textContent = '🏆';
+    $('endTitle').textContent = 'ПОБЕДА!';
+    $('endText').textContent = `Прекрасно! Ты преодолел все 15 развилок. Правильно решено примеров: ${state.right}!`;
+    
+    // Фанфары победы
+    setTimeout(() => tone(523, 0.15, 'sine', 0.1), 0);
+    setTimeout(() => tone(659, 0.15, 'sine', 0.1), 120);
+    setTimeout(() => tone(784, 0.15, 'sine', 0.1), 240);
+    setTimeout(() => tone(1046, 0.4, 'sine', 0.12), 360);
+  } else {
+    screens.end.className = "screen end lose-screen";
+    $('endIcon').textContent = '🛶';
+    $('endTitle').textContent = 'ЛОДКА УТОНУЛА';
+    $('endText').textContent = `У лодки кончилась прочность. Но ты успел ответить на ${state.round} примеров! Попробуем ещё?`;
+    
+    // Печальный проигрышный джингл
+    setTimeout(() => tone(392, 0.25, 'triangle', 0.1), 0);
+    setTimeout(() => tone(349, 0.25, 'triangle', 0.1), 200);
+    setTimeout(() => tone(311, 0.25, 'triangle', 0.1), 400);
+    setTimeout(() => tone(293, 0.5, 'triangle', 0.1), 600);
+  }
+  
+  show('end');
+}
+
+// Слушатели событий интерфейса
+$('toRulesBtn').onclick = () => show('rules');
+$('toModesBtn').onclick = () => show('modes');
+
+document.querySelectorAll('.mode-btn-large').forEach(b => {
+  b.onclick = () => setMode(b.dataset.mode);
+});
+
+$('startBtn').onclick = start;
+$('againBtn').onclick = start;
+els.left.onclick = () => choose('left');
+els.right.onclick = () => choose('right');
+$('homeBtn').onclick = () => show('splash');
+$('exitBtn').onclick = () => {
+  clearTimeout(state.timer);
+  state.tickTimers.forEach(clearTimeout);
+  stopAmbient();
+  show('splash');
+};
+
+$('soundBtn').onclick = () => {
+  state.sound = !state.sound;
+  $('soundBtn').textContent = state.sound ? '🔊' : '🔇';
+  if (state.sound) {
+    tone(520, 0.1);
+    if (screens.game.classList.contains('active')) {
+      startAmbient();
+    }
+  } else {
+    stopAmbient();
+  }
+};
+
+document.addEventListener('keydown', e => {
+  if (screens.game.classList.contains('active')) {
+    if (e.key === 'ArrowLeft') choose('left');
+    if (e.key === 'ArrowRight') choose('right');
+  }
+});
+</script>
+</body>
+</html>
